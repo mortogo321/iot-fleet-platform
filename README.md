@@ -173,7 +173,7 @@ bun run dev:simulator                     # fleet against localhost
 bun run dev:web                           # Vite dev server on :5173 (proxies /api, /ws)
 ```
 
-## Testing
+## Testing & verification
 
 ```bash
 bun run typecheck   # strict TS across all workspaces
@@ -186,10 +186,21 @@ The tricky logic is unit-tested with injectable clocks/writers (no sleeps), and 
 path has an integration test against an in-process broker. CI runs typecheck, lint, tests, and the
 web build on every push.
 
+Beyond unit tests, the repo was validated end-to-end against the live compose stack: fleet
+self-provisioning → broker auth delegation (all devices authenticated through the platform, zero
+broker-side credentials) → telemetry ingest → synchronous RPC round-trips → shadow patch/409/delta
+application → OTA rollout to completion (device visibly reboots via LWT) → alert fire and
+auto-resolve driven by the simulator's injected anomaly episodes.
+
 ## Scaling & production notes
 
 Deliberate POC boundaries, and what changes in production:
 
+- **Broker-restart resilience**: the platform dials a *fresh* MQTT client on every backoff attempt
+  (mqtt.js `reconnect()` pins the previously resolved broker address — fatal when a containerized
+  broker comes back with a new IP), and its HTTP idle timeout deliberately outlives EMQX's
+  auth-connector keep-alive recycle so the broker is always the side closing idle connections.
+  Kill and restart any container and the system converges on its own.
 - **Ingest scale-out**: already shared-subscription-based — run N server replicas; move the alert
   engine to keyed consumers (or postgres advisory locks) when replicated.
 - **Transport security**: terminate MQTTS (8883) and HTTPS at the broker/edge; per-device X.509
