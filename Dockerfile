@@ -8,7 +8,9 @@ COPY packages/shared/package.json packages/shared/
 COPY apps/server/package.json apps/server/
 COPY apps/simulator/package.json apps/simulator/
 COPY apps/web/package.json apps/web/
-RUN bun install --frozen-lockfile
+# Hoisted linker: the isolated (default) layout keeps per-workspace symlink dirs that
+# don't survive COPY --from into the runtime stages.
+RUN bun install --frozen-lockfile --linker=hoisted
 
 FROM deps AS build
 COPY tsconfig.base.json ./
@@ -24,7 +26,7 @@ COPY packages/shared/package.json packages/shared/
 COPY apps/server/package.json apps/server/
 COPY apps/simulator/package.json apps/simulator/
 COPY apps/web/package.json apps/web/
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --production --linker=hoisted
 
 FROM oven/bun:1 AS server
 WORKDIR /app
