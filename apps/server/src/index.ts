@@ -184,6 +184,10 @@ async function main(): Promise<void> {
   // delegation calls back into this same server over HTTP.
   const server = Bun.serve({
     port: config.port,
+    // Longer than EMQX's HTTP-connector keep-alive recycle (max_inactive 10s): the broker
+    // must always be the side that closes an idle auth/acl connection, otherwise its reuse
+    // of a socket we just closed surfaces as authentication_failure on device connects.
+    idleTimeout: 120,
     fetch(req, srv) {
       const url = new URL(req.url);
       if (url.pathname === '/ws') {
