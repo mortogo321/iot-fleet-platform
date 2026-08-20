@@ -3,7 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "description": "IoT fleet management platform POC - MQTT auth delegation, device shadows, RPC, OTA rollout, TimescaleDB telemetry, rules engine, Prometheus/Grafana",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "packageManager": "bun@1.3.14",
   "scripts": {
     "dev:server": "bun run --filter server dev",

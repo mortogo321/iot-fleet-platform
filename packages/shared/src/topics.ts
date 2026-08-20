@@ -7,7 +7,8 @@ export const TOPICS = {
   shadowReported: (deviceId: string) => `devices/${deviceId}/shadow/reported`,
   shadowReportedAll: 'devices/+/shadow/reported',
   shadowDelta: (deviceId: string) => `devices/${deviceId}/shadow/delta`,
-  rpcRequest: (deviceId: string, requestId: string) => `devices/${deviceId}/rpc/request/${requestId}`,
+  rpcRequest: (deviceId: string, requestId: string) =>
+    `devices/${deviceId}/rpc/request/${requestId}`,
   rpcRequestSub: (deviceId: string) => `devices/${deviceId}/rpc/request/+`,
   rpcResponse: (deviceId: string, requestId: string) =>
     `devices/${deviceId}/rpc/response/${requestId}`,
