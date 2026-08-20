@@ -1,0 +1,22 @@
+// Copy this file to config.h (gitignored) and fill in real values before building.
+#pragma once
+
+#define WIFI_SSID "your-wifi-ssid"
+#define WIFI_PASSWORD "your-wifi-password"
+
+// EMQX broker address reachable from the device's network.
+#define MQTT_HOST "192.168.1.10"
+#define MQTT_PORT 1883
+
+// Must match a device provisioned via POST /api/devices (see apps/simulator or the ops console).
+// MQTT username AND clientid both equal DEVICE_ID; password is DEVICE_SECRET.
+#define DEVICE_ID "dev-xxxxxxxx"
+#define DEVICE_SECRET "ds_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+#define DHT_PIN 4
+#define DHT_TYPE DHT22
+// Battery reading expects a resistor-divider from the battery to this ADC-capable pin.
+#define BATTERY_ADC_PIN 34
+#define STATUS_LED_PIN 2
+
+#define DEFAULT_REPORTING_INTERVAL_MS 3000
