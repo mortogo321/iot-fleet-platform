@@ -1,0 +1,113 @@
+name: iot-fleet-platform
+
+services:
+  emqx:
+    image: emqx/emqx:latest
+    ports:
+      - "1883:1883"   # MQTT
+      - "18083:18083" # EMQX dashboard (admin / EMQX_DASHBOARD_PASSWORD)
+    environment:
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_DASHBOARD_PASSWORD:-iot-admin-1}
+    volumes:
+      - ./infra/emqx/emqx.conf:/opt/emqx/etc/emqx.conf:ro
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+    restart: unless-stopped
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      POSTGRES_USER: iot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot}
+      POSTGRES_DB: iot
+    ports:
+      - "5432:5432"
+    volumes:
+      - ts_data:/var/lib/postgresql/data
+      - ./infra/timescale/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iot -d iot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+      target: server
+    ports:
+      - "8080:8080" # ops console + REST + WS + /metrics
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://iot:${POSTGRES_PASSWORD:-iot}@timescaledb:5432/iot
+      MQTT_URL: mqtt://emqx:1883
+      MQTT_SERVER_USERNAME: ${MQTT_SERVER_USERNAME:-platform-server}
+      MQTT_SERVER_PASSWORD: ${MQTT_SERVER_PASSWORD:-platform-secret-dev}
+      MQTT_SHARED_GROUP: ${MQTT_SHARED_GROUP:-ingest}
+      PROVISIONING_TOKEN: ${PROVISIONING_TOKEN:-dev-provisioning-token}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-dev-webhook-secret}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      emqx:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  simulator:
+    build:
+      context: .
+      target: simulator
+    environment:
+      API_URL: http://server:8080
+      MQTT_URL: mqtt://emqx:1883
+      SIM_DEVICE_COUNT: ${SIM_DEVICE_COUNT:-6}
+      SIM_ANOMALY_CHANCE: ${SIM_ANOMALY_CHANCE:-0.02}
+      SIM_STATE_FILE: /data/devices.json
+      PROVISIONING_TOKEN: ${PROVISIONING_TOKEN:-dev-provisioning-token}
+    volumes:
+      - sim_data:/data
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000" # anonymous viewer enabled; admin / GRAFANA_ADMIN_PASSWORD to edit
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-iot-admin-1}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - timescaledb
+    restart: unless-stopped
+
+volumes:
+  ts_data:
+  sim_data:
+  grafana_data:
