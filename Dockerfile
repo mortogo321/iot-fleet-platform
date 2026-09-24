@@ -1,7 +1,7 @@
 # Multi-target build: `target: server` (API + ops console) and `target: simulator`.
 # Bun runs TypeScript directly — only the web app needs a build step.
 
-FROM oven/bun:1 AS deps
+FROM oven/bun:1.4.2 AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY packages/shared/package.json packages/shared/
@@ -19,7 +19,7 @@ COPY apps/web apps/web
 RUN bun run --filter web build
 
 # Production-only node_modules (no vite/test tooling in runtime images).
-FROM oven/bun:1 AS proddeps
+FROM oven/bun:1.4.2 AS proddeps
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY packages/shared/package.json packages/shared/
@@ -28,7 +28,7 @@ COPY apps/simulator/package.json apps/simulator/
 COPY apps/web/package.json apps/web/
 RUN bun install --frozen-lockfile --production --linker=hoisted
 
-FROM oven/bun:1 AS server
+FROM oven/bun:1.4.2 AS server
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=proddeps /app/node_modules node_modules
@@ -39,7 +39,7 @@ COPY --from=build /app/apps/web/dist apps/web/dist
 EXPOSE 8080
 CMD ["bun", "apps/server/src/index.ts"]
 
-FROM oven/bun:1 AS simulator
+FROM oven/bun:1.4.2 AS simulator
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=proddeps /app/node_modules node_modules

@@ -223,3 +223,7 @@ packages/shared  single source of truth: topic contract, zod schemas, WS events,
 infra/           EMQX config, TimescaleDB schema, Prometheus + Grafana provisioning
 hardware/        ESP32 reference firmware (PlatformIO)
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

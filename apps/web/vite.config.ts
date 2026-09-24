@@ -10,6 +10,20 @@ export default defineConfig({
       '@iot/shared': new URL('../../packages/shared/src', import.meta.url).pathname,
     },
   },
+  build: {
+    // Vendor-split the 640kB+ bundle (react + recharts) for better caching.
+    chunkSizeWarningLimit: 700,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'vendor-react', test: /node_modules\/(react|react-dom|scheduler)\// },
+            { name: 'vendor-charts', test: /node_modules\/(recharts|d3-.+|victory-vendor)\// },
+          ],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:8080',

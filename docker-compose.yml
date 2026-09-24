@@ -2,7 +2,7 @@ name: iot-fleet-platform
 
 services:
   emqx:
-    image: emqx/emqx:latest
+    image: emqx/emqx:5.8.8
     ports:
       - "1883:1883"   # MQTT
       - "18083:18083" # EMQX dashboard (admin / EMQX_DASHBOARD_PASSWORD)
@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   timescaledb:
-    image: timescale/timescaledb:latest-pg17
+    image: timescale/timescaledb:2.30.1-pg17
     environment:
       POSTGRES_USER: iot
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot}
@@ -83,7 +83,7 @@ services:
     restart: unless-stopped
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.14.0
     ports:
       - "9090:9090"
     volumes:
@@ -91,7 +91,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.2.1
     ports:
       - "3000:3000" # anonymous viewer enabled; admin / GRAFANA_ADMIN_PASSWORD to edit
     environment:

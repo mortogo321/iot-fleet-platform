@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "@iot/shared": "workspace:*",
-    "hono": "^4.13.3",
-    "mqtt": "^5.15.2",
+    "hono": "^4.13.8",
+    "mqtt": "^5.16.0",
     "pg": "^8.23.0",
     "prom-client": "^15.1.3",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",
-    "aedes": "^1.1.1"
+    "aedes": "^1.2.0"
   }
 }

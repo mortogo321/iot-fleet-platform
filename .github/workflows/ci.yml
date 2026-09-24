@@ -9,9 +9,11 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -27,3 +29,8 @@ jobs:
 
       - name: Build web
         run: bun run --filter web build
+
+      - name: Build Docker images (server + simulator)
+        run: |
+          docker build --target server -t iot-server:ci .
+          docker build --target simulator -t iot-simulator:ci .
