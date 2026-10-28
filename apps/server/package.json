@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@iot/shared": "workspace:*",
-    "hono": "^4.13.13",
+    "hono": "^4.13.14",
     "mqtt": "^5.16.1",
     "pg": "^8.23.1",
     "prom-client": "^15.1.3",
