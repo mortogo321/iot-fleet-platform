@@ -61,10 +61,10 @@ curl -s -X POST localhost:8080/api/devices/$DEV/firmware \
 ## 5. Alerts
 
 The simulator injects occasional hot-spike episodes, so alerts fire on their own — but you can
-force one instantly by tightening a rule in **Alerts & Rules** (e.g. set *High temperature* to
+force one instantly by tightening a rule in **Alerts & Rules** (e.g. set _High temperature_ to
 `> 20`). Watch it fire, then auto-resolve after restoring the threshold.
 
-The *Sustained high humidity* seed rule demonstrates duration-gated firing: the condition must
+The _Sustained high humidity_ seed rule demonstrates duration-gated firing: the condition must
 hold for 60s before it trips (no flapping on a single noisy sample).
 
 ### Signed webhook action

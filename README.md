@@ -14,12 +14,12 @@ TimescaleDB, React, Recharts, Docker Compose.
 docker compose up --build
 ```
 
-| Service | URL |
-|---|---|
-| Ops console (REST + WS + UI) | http://localhost:8080 |
-| Grafana (anonymous viewer) | http://localhost:3000 |
-| EMQX dashboard | http://localhost:18083 (admin / `iot-admin-1`) |
-| Prometheus | http://localhost:9090 |
+| Service                      | URL                                            |
+| ---------------------------- | ---------------------------------------------- |
+| Ops console (REST + WS + UI) | http://localhost:8080                          |
+| Grafana (anonymous viewer)   | http://localhost:3000                          |
+| EMQX dashboard               | http://localhost:18083 (admin / `iot-admin-1`) |
+| Prometheus                   | http://localhost:9090                          |
 
 A simulated fleet self-provisions on first boot and starts streaming immediately. See
 [docs/DEMO.md](docs/DEMO.md) for a 5-minute guided tour (shadows, RPC, OTA, alerts).
@@ -72,7 +72,7 @@ flowchart LR
 
 **Device lifecycle & identity**
 - Provisioning API issues per-device credentials; secrets stored as argon2id hashes, returned once.
-- The broker holds **no credential state**: EMQX delegates connect auth *and* per-topic authorization
+- The broker holds **no credential state**: EMQX delegates connect auth _and_ per-topic authorization
   to the platform over HTTP. Devices can only touch their own topics (`clientid == username ==
   deviceId` enforced); the ACL matrix is a pure, unit-tested function.
 - Presence via MQTT Last Will: retained `online`/`offline` status, reflected live in the console.
@@ -114,16 +114,16 @@ flowchart LR
 
 ## MQTT topic contract
 
-| Topic | Direction | Notes |
-|---|---|---|
-| `telemetry/{deviceId}` | device → platform | QoS 1, JSON, validated at the boundary |
-| `devices/{id}/status` | device → platform | retained `online`/`offline`, LWT |
-| `devices/{id}/shadow/reported` | device → platform | full reported state |
-| `devices/{id}/shadow/delta` | platform → device | `{ version, state }` — keys to apply |
-| `devices/{id}/rpc/request/{requestId}` | platform → device | correlated request |
-| `devices/{id}/rpc/response/{requestId}` | device → platform | correlated response |
-| `devices/{id}/ota/progress` | device → platform | rollout progress events |
-| `alerts/{deviceId}` | platform → subscribers | fired alerts for integrations |
+| Topic                                   | Direction              | Notes                                  |
+| --------------------------------------- | ---------------------- | -------------------------------------- |
+| `telemetry/{deviceId}`                  | device → platform      | QoS 1, JSON, validated at the boundary |
+| `devices/{id}/status`                   | device → platform      | retained `online`/`offline`, LWT       |
+| `devices/{id}/shadow/reported`          | device → platform      | full reported state                    |
+| `devices/{id}/shadow/delta`             | platform → device      | `{ version, state }` — keys to apply   |
+| `devices/{id}/rpc/request/{requestId}`  | platform → device      | correlated request                     |
+| `devices/{id}/rpc/response/{requestId}` | device → platform      | correlated response                    |
+| `devices/{id}/ota/progress`             | device → platform      | rollout progress events                |
+| `alerts/{deviceId}`                     | platform → subscribers | fired alerts for integrations          |
 
 Any MQTT-capable device (ESP32, Zigbee2MQTT bridge, Tasmota, …) can join the fleet by speaking
 this contract — `hardware/esp32-sensor/` is a minimal PlatformIO reference implementation.
@@ -142,20 +142,20 @@ this contract — `hardware/esp32-sensor/` is a minimal PlatformIO reference imp
 
 ## REST API
 
-| Method & path | Purpose |
-|---|---|
-| `POST /api/devices` | provision a device (returns the secret once) — `x-provisioning-token` |
-| `GET /api/devices` · `GET /api/devices/:id` | fleet / device detail with latest telemetry |
-| `GET /api/devices/:id/telemetry?minutes=60&bucket=raw\|1m` | history (raw or 1-minute aggregate) |
-| `GET` / `PATCH /api/devices/:id/shadow` | read / update desired state (versioned) |
-| `POST /api/devices/:id/rpc` | invoke a device method, await the response |
-| `POST /api/devices/:id/firmware` | deploy a firmware version (OTA via shadow) |
-| `GET` / `POST /api/firmware` | firmware registry |
-| `GET /api/alerts` · CRUD `/api/rules` | alerting |
-| `POST /api/ingest` | HTTP telemetry path for non-MQTT devices — `Bearer {deviceId}.{secret}` |
-| `POST /api/internal/mqtt/auth` · `/acl` | EMQX delegation callbacks — `x-internal-token` |
-| `GET /api/stats` · `GET /health` · `GET /metrics` | stats, health, Prometheus |
-| `WS /ws` | live event stream (telemetry, presence, shadows, alerts, OTA, stats) |
+| Method & path                                              | Purpose                                                                 |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `POST /api/devices`                                        | provision a device (returns the secret once) — `x-provisioning-token`   |
+| `GET /api/devices` · `GET /api/devices/:id`                | fleet / device detail with latest telemetry                             |
+| `GET /api/devices/:id/telemetry?minutes=60&bucket=raw\|1m` | history (raw or 1-minute aggregate)                                     |
+| `GET` / `PATCH /api/devices/:id/shadow`                    | read / update desired state (versioned)                                 |
+| `POST /api/devices/:id/rpc`                                | invoke a device method, await the response                              |
+| `POST /api/devices/:id/firmware`                           | deploy a firmware version (OTA via shadow)                              |
+| `GET` / `POST /api/firmware`                               | firmware registry                                                       |
+| `GET /api/alerts` · CRUD `/api/rules`                      | alerting                                                                |
+| `POST /api/ingest`                                         | HTTP telemetry path for non-MQTT devices — `Bearer {deviceId}.{secret}` |
+| `POST /api/internal/mqtt/auth` · `/acl`                    | EMQX delegation callbacks — `x-internal-token`                          |
+| `GET /api/stats` · `GET /health` · `GET /metrics`          | stats, health, Prometheus                                               |
+| `WS /ws`                                                   | live event stream (telemetry, presence, shadows, alerts, OTA, stats)    |
 
 ## Configuration
 
@@ -195,8 +195,7 @@ auto-resolve driven by the simulator's injected anomaly episodes.
 ## Scaling & production notes
 
 Deliberate POC boundaries, and what changes in production:
-
-- **Broker-restart resilience**: the platform dials a *fresh* MQTT client on every backoff attempt
+- **Broker-restart resilience**: the platform dials a _fresh_ MQTT client on every backoff attempt
   (mqtt.js `reconnect()` pins the previously resolved broker address — fatal when a containerized
   broker comes back with a new IP), and its HTTP idle timeout deliberately outlives EMQX's
   auth-connector keep-alive recycle so the broker is always the side closing idle connections.

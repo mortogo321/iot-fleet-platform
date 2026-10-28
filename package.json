@@ -7,7 +7,7 @@
     "apps/*",
     "packages/*"
   ],
-  "packageManager": "bun@1.4.2",
+  "packageManager": "bun@1.4.4",
   "scripts": {
     "dev:server": "bun run --filter server dev",
     "dev:simulator": "bun run --filter simulator dev",
@@ -19,8 +19,8 @@
     "build:web": "bun run --filter web build"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.14",
-    "@types/bun": "^1.4.2",
+    "@biomejs/biome": "^2.6.2",
+    "@types/bun": "^1.4.3",
     "typescript": "^7.0.2"
   }
 }
